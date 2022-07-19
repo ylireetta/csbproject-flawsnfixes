@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Add move page{% endblock %}
+
+{% block content %}
+
+<script>
+    function filter_search(event) {
+        console.log(event.moves);
+        var a = "{{move_list}}"; // https://stackoverflow.com/a/298793
+        console.log(a);
+    }
+</script>
+<p>
+    Search:
+    <input type="text" name="search_phrase" onchange="filter_search(this)" value="{{search_value}}" moves="{{move_list}}"/>
+</p>
+<p>The database contains the following moves:</p>
+<table>
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+    </tr>
+    {% for move in move_list %}
+    <tr>
+        <td>{{move.id}}</td>
+        <td>{{move.move_name}}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}
