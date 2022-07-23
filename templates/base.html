@@ -7,15 +7,16 @@
     <body>
         <main>
             {% if user.is_authenticated %}
-            <p>Hi {{user.username}} <a href="{% url 'logout' %}">Log out</a></p>
+                <p>Hi {{user.username}} <a href="{% url 'logout' %}">Log out</a></p>
             {% else %}                 
-            <h2>Log In</h2>
-            <form method="post">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit">Log In</button>
-            </form>
+                <h2>Log In</h2>
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit">Log In</button>
+                </form>
             {% endif %}
+            <a href="/moves/">Index</a>
             {% block content %}
             {% endblock %}
         </main>

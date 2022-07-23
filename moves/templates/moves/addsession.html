@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% block title %}Add new training session page{% endblock %}
+
+{% block content %}
+<script>
+    var myArray = [];
+
+    function addToArray() {
+        var moveSelection = document.getElementById("moves");
+        var movename = moveSelection.options[moveSelection.selectedIndex].innerHTML;
+        var reps = document.getElementById("reps").value;
+        var weights = document.getElementById("weights").value;
+        var moveId = document.getElementById("moves").value;
+
+        var newMove = {
+            'moveId': moveId,
+            'movename': movename,
+            'reps': reps,
+            'weights': weights
+        };
+
+        myArray.push(newMove);
+
+        var http = new XMLHttpRequest();
+        // We are not using any CSRF protection(!) this should not be done in production
+        http.open("POST", '', true);
+        http.setRequestHeader("Content-type", "application/json");
+
+        http.onreadystatechange = function () {
+                    if (http.readyState === 4) {
+                        if (http.status === 200) {
+                            console.log(http.responseText);
+                        }
+                    }
+                }
+
+        http.send(JSON.stringify(newMove));
+
+
+    }
+
+    function startCreating() {
+        var x = document.getElementById("session_form");
+        if (x.style.display === "none") {
+            x.style.display = "block";
+        } else {
+            x.style.display = "none";
+        }
+    }
+
+
+
+</script>
+<p><button id="start" onclick="startCreating()">Start</button></p>
+<form id="session_form" style="display:none;" method="POST">
+    
+    {% csrf_token %}
+    <label for="moves">Select move:</label>
+    <select id="moves" name="moves">
+        {% for move in move_list %}
+            <option value="{{move.id}}">{{move.move_name}}</option>
+        {% endfor %}
+    </select>
+    <br />
+    <label for="reps">Reps:</label>
+    <input type="number" min="0" value="0" name="reps" id="reps">
+    <br />
+    <label for="weights">Weights (kg):</label>
+    <input type="number"  min="0" value="0" name="weights" id="weights">
+    <br />
+    <input type="submit" name="save_one_set" value="Add set">
+</form>
+
+
+<form action="" method="POST">
+    <!--{% csrf_token %}-->
+    <input type="hidden" id="selected_moves" name="selected_moves">
+    <input type="submit" name="save_complete_session" value="Save workout session">
+</form>
+
+
+{% endblock %}

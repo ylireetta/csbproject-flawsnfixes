@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}Search sessions page{% endblock %}
+
+{% block content %}
+<form action="" method="POST">
+    {% csrf_token %}
+    Workout session date: <input type="date" name="session_date"><br />
+    <input type="submit" value="Search">
+</form>
+
+<ul>
+    {% for session in sessions %}
+    <li>{{session.owner}} {{session.date}}</li>
+    {% endfor %}
+</ul>
+
+
+<h2>My latest session</h2>
+<p>
+    Session {{latest_session.id}} complete: {{latest_session.ended}}<br />
+    <ul>            
+        {% for set in session_sets %}
+            <li>{{set.move_id}}: {{set.reps}} * {{set.weight}} kg</li>
+        {% endfor %}
+    </ul>
+</p>
+
+{% endblock %}

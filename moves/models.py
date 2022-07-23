@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -10,8 +11,9 @@ class Move(models.Model):
         return self.move_name
 
 class Session(models.Model):
-    date = models.DateTimeField()
+    date = models.DateField(default=datetime.now())
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    ended = models.BooleanField(default=True)
 
     def __str__(self):
         return f'Training session {self.date} for user {self.owner.pk}'
