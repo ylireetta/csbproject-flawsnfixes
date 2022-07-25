@@ -129,5 +129,5 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# CYBER SECURITY FIX (remove comment to fix flaw): End logged in user session when browser window is closed
+# CYBER SECURITY FIX 1 (remove comment to fix flaw): End logged in user session when browser window is closed
 #SESSION_EXPIRE_AT_BROWSER_CLOSE = True

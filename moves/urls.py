@@ -8,4 +8,5 @@ urlpatterns = [
     path('addmove/', views.addmoveView, name='addmove'),
     path('searchsessions/', views.searchSessionsView, name='searchsessions'),
     path('addsession/', views.addSessionView, name='addsession'),
+    path('delete/<int:id>/', views.deleteSession, name='deletesession'),
 ]

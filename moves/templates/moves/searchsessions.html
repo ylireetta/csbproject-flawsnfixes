@@ -3,6 +3,7 @@
 
 {% block content %}
 <form action="" method="GET">
+    {% csrf_token %}
     {% if user.is_superuser %}
     <input type="hidden" name="admin" value="1">
     {% else %}
