@@ -23,63 +23,83 @@ def allmovesView(request):
 #@login_required
 def addmoveView(request):
     if request.method == 'POST':
-        new_move = Move.objects.create(move_name=request.POST.get('new_move_name'))
+        Move.objects.create(move_name=request.POST.get('new_move_name'))
         return redirect('/moves')
     return render(request, 'moves/addmove.html')
 
 # CYBER SECURITY FIX 2 (remove comment to fix flaw): Do not allow unauthenticated users to access page
 #@login_required
-# CYBER SECURITY FIX 3 (rename --> searchSessionsView): Use POST request to search for sessions completed on a specific date
+# CYBER SECURITY FIX 3 (rename this --> searchSessionsView): Use POST request to search for sessions completed on a specific date
 def searchSessionsViewToRename(request):
     context = {}
+    filtered_sessions = None
+    results = None
+    latest_session = None
+    session_moves = None
     if request.method == 'POST' and request.user.is_authenticated:
-        try:
-            parsed_date = datetime.datetime.strptime(request.POST.get('session_date'), '%Y-%m-%d')
-            filtered_sessions = Session.objects.filter(date=parsed_date)
-            context['sessions'] = filtered_sessions
-        except:
-            # If parsing fails, no sessions are shown
-            return render(request, 'moves/searchsessions.html', context)
+        if 'search_by_date' in request.POST:
+            try:
+                filtered_sessions = addToContext(request, 'sessions')
+            except:
+                # If parsing fails, no sessions are shown
+                filtered_sessions = None
+
+        if 'search_by_phrase' in request.POST:
+            results = addToContext(request, 'searchresults')
 
     try:
-        latest_session = Session.objects.filter(owner=request.user).latest('id')
-        session_moves = Set.objects.filter(session_id=latest_session)
-
-        context['latest_session'] = latest_session
-        context['session_sets'] = session_moves
+        latest_session, session_moves = addToContext(request, 'latest')
         
     except:
-        return render(request, 'moves/searchsessions.html', context)
+        latest_session = None
+
+    context = {
+        'sessions': filtered_sessions,
+        'searchresults': results,
+        'latest_session': latest_session,
+        'session_sets': session_moves
+    }
     
     return render(request, 'moves/searchsessions.html', context)
 
-# CYBER SECURITY FIX 3 (rename this or remove completely): Use POST request instead of GET
+# CYBER SECURITY FIX 3 (rename this or remove completely to fix): Use POST request instead of GET
 def searchSessionsView(request):
     context = {}
+    admin = None
+    filtered_sessions = None
+    results = None
+    latest_session = None
+    session_moves = None
     # We need to check if the url contains get parameters - the method is also get when we navigate to this view as per usual
-    if request.method == 'GET' and request.user.is_authenticated and request.GET.get('session_date'):
-        if request.GET.get('admin') == '1':
-            context['admin'] = True
-        try:
-            parsed_date = datetime.datetime.strptime(request.GET.get('session_date'), '%Y-%m-%d')
-            filtered_sessions = Session.objects.filter(date=parsed_date)
-            context['sessions'] = filtered_sessions
-        except:
-            # If parsing fails, no sessions are shown
-            return render(request, 'moves/searchsessions.html', context)
+    if request.method == 'GET' and request.user.is_authenticated:
+        if 'search_by_date' in request.GET:
+            admin = addToContext(request, 'admin')
+            try:
+                filtered_sessions = addToContext(request, 'sessions')
+            except:
+                # If parsing fails, no sessions are shown
+                filtered_sessions = filtered_sessions
+        
+        if 'search_by_phrase' in request.GET:
+            results = addToContext(request, 'searchresults')
 
     try:
-        latest_session = Session.objects.filter(owner=request.user).latest('id')
-        session_moves = Set.objects.filter(session_id=latest_session)
-
-        context['latest_session'] = latest_session
-        context['session_sets'] = session_moves
-        
+        latest_session, session_moves = addToContext(request, 'latest')
     except:
-        return render(request, 'moves/searchsessions.html', context)
+        latest_session = latest_session
+
+    context = {
+        'admin': admin,
+        'sessions': filtered_sessions,
+        'searchresults': results,
+        'latest_session': latest_session,
+        'session_sets': session_moves
+    }
     
     return render(request, 'moves/searchsessions.html', context)
 
+# CYBER SECURITY FIX 5 (remove decorator to fix): when posting data, the views should require csrf token to be posted along with the actual data.
+@csrf_exempt
 def addSessionView(request):
     # https://stackoverflow.com/questions/59727384/multiple-django-forms-in-single-view-why-does-one-post-clear-other-forms
     if request.method == 'POST':
@@ -123,3 +143,38 @@ def deleteSession(request, id):
         return redirect('/moves/searchsessions')
 
     return redirect('/moves/searchsessions')
+
+def addToContext(request, attribute):
+    if attribute == 'sessions':
+        # This will work regardless of whether we are using post or get method in the template form
+        if request.method == 'POST':
+            parsed_date = datetime.datetime.strptime(request.POST.get('session_date'), '%Y-%m-%d')
+        elif request.method == 'GET':
+            parsed_date = datetime.datetime.strptime(request.GET.get('session_date'), '%Y-%m-%d')
+        
+        filtered_sessions = Session.objects.filter(date=parsed_date)
+        return filtered_sessions
+
+    if attribute == 'searchresults':
+        # This will work regardless of whether we are using post or get method in the template form
+        if request.method == 'POST':
+            phrase = request.POST.get('searchphrase')
+        elif request.method == 'GET':
+            phrase = request.GET.get('searchphrase')
+
+        # The table for Move objects has been renamed to movestable in models.py
+        # CYBER SECURITY FIX 4: queries should not be made with raw SQL and especially not by using placeholders in the SQL string
+        results = Move.objects.raw("SELECT id, move_name FROM movestable WHERE move_name LIKE '%%%s%%'" % phrase)
+
+        # Fix flaw 4 by using the following query method instead of raw SQL
+        #results = Move.objects.filter(move_name__contains=phrase)
+        return results
+
+    if attribute == 'admin':
+        return request.GET.get('admin') == '1'
+
+    if attribute == 'latest':
+        latest_session = Session.objects.filter(owner=request.user).latest('id')
+        session_moves = Set.objects.filter(session_id=latest_session)
+
+        return latest_session, session_moves

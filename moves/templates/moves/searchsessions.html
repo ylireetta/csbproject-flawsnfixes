@@ -3,21 +3,20 @@
 
 {% block content %}
 <form action="" method="GET">
-    {% csrf_token %}
     {% if user.is_superuser %}
     <input type="hidden" name="admin" value="1">
     {% else %}
     <input type="hidden" name="admin" value="0">
     {% endif %}
     Workout session date: <input type="date" name="session_date"><br />
-    <input type="submit" value="Search">
+    <input type="submit" value="Search" name="search_by_date">
 </form>
 <!--
-    CYBER SECURITY FIX 3: Use POST method to search for sessions. Remove the form above this that uses GET and use the following form instead.
+    CYBER SECURITY FIX 3: Use POST method to search for sessions. Remove the form above that uses GET and use the following form instead. Note the csrf token to post!
     <form action="" method="POST">
     {% csrf_token %}
     Workout session date: <input type="date" name="session_date"><br />
-    <input type="submit" value="Search">
+    <input type="submit" value="Search" name="search_by_date">
 </form>
 -->
 
@@ -32,7 +31,7 @@
         -->
         
         {% if admin %}
-            <!--The url tag contains deletesession, which is the _name_ we have defined in urls.py-->
+            <!--The url tag contains deletesession which is the _name_ we have defined in urls.py-->
             <a href="{% url 'deletesession' id=session.id %}">Delete session</a>
         {% endif %}
     </li>
@@ -48,6 +47,45 @@
             <li>{{set.move_id}}: {{set.reps}} * {{set.weight}} kg</li>
         {% endfor %}
     </ul>
+</p>
+
+<p>
+    <form action="" method="GET">
+        <input type="text" name="searchphrase">
+        <input type="submit" value="Search by phrase" name="search_by_phrase">
+    </form>
+<!-- 
+    CYBER SECURITY FIX 3: Use POST method to search for moves. Remove the form above that uses GET and use the following form instead. Note the csrf token to post!
+    <form action="" method="POST">
+        {% csrf_token %}
+        <input type="text" name="searchphrase">
+        <input type="submit" value="Search by phrase" name="search_by_phrase">
+    </form>
+-->
+
+    {% if searchresults %}
+        <table>
+            <tr>
+                <th>
+                    ID
+                </th>
+                <th>
+                    Display name
+                </th>
+            </tr>
+            
+        {% for result in searchresults %}
+            <tr>
+                <td>
+                    {{result.id}}
+                </td>
+                <td>
+                    {{result}}
+                </td>
+            </tr>
+        {% endfor %}
+        </table>
+    {% endif %}
 </p>
 
 {% endblock %}

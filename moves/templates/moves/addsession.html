@@ -53,8 +53,8 @@
 </script>
 <p><button id="start" onclick="startCreating()">Start</button></p>
 <form id="session_form" style="display:none;" method="POST">
-    
-    {% csrf_token %}
+    <!-- CYBER SECURITY FIX 5 (remove the following line comment to fix): send csrf token along with the data -->
+    <!--{% csrf_token %}-->
     <label for="moves">Select move:</label>
     <select id="moves" name="moves">
         {% for move in move_list %}
@@ -73,6 +73,7 @@
 
 
 <form action="" method="POST">
+    <!-- CYBER SECURITY FIX 5 (remove the following line comment to fix): send csrf token along with the data -->
     <!--{% csrf_token %}-->
     <input type="hidden" id="selected_moves" name="selected_moves">
     <input type="submit" name="save_complete_session" value="Save workout session">
