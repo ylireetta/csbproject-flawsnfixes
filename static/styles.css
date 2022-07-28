@@ -69,7 +69,6 @@ td {
 }
 
 #live_search, #resultdiv {
-    display: none;
     /* CYBER SECURITY FIX: change the div display from none to block to implement live search */
-    /*display: block;*/
+    display: none;
 }

@@ -68,6 +68,8 @@ def searchSessionsViewToRename(request):
     
     return render(request, 'moves/searchsessions.html', context)
 
+# CYBER SECURITY FIX 2 (remove comment to fix flaw): Do not allow unauthenticated users to access page
+#@login_required
 # CYBER SECURITY FIX 3 (to fix: 1) rename this or remove completely AND 2) rename the method above): Use POST request instead of GET
 def searchSessionsView(request):
     context = {}
