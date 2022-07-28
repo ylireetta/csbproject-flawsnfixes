@@ -32,6 +32,7 @@
                 {% endif %}
             -->
             
+            <!-- CYBER SECURITY FIX 3 (remove the following check and link to fix): no need to provide delete links based on url parameters. -->
             {% if admin %}
                 <!--The url tag contains deletesession which is the _name_ we have defined in urls.py-->
                 <a href="{% url 'deletesession' id=session.id %}">Delete session</a>
