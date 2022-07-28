@@ -1,31 +1,126 @@
 {% extends 'base.html' %}
-{% block title %}Add move page{% endblock %}
+{% block title %}All moves page{% endblock %}
 
 {% block content %}
 
 <script>
-    function filter_search(event) {
-        console.log(event.moves);
-        var a = "{{move_list}}"; // https://stackoverflow.com/a/298793
-        console.log(a);
+    function showHelp() {
+        alert("You can search the moves database by providing a move name (or a part of it).\n\n" +
+        "For example, searching with the phrase 'at' would return both 'squAT' and 'seATed dumbbell lATeral raise'.");
     }
-</script>
-<p>
-    Search:
-    <input type="text" name="search_phrase" onchange="filter_search(this)" value="{{search_value}}" moves="{{move_list}}"/>
-</p>
-<p>The database contains the following moves:</p>
-<table>
-    <tr>
-        <th>ID</th>
-        <th>Name</th>
-    </tr>
-    {% for move in move_list %}
-    <tr>
-        <td>{{move.id}}</td>
-        <td>{{move.move_name}}</td>
-    </tr>
-    {% endfor %}
-</table>
 
+    function createTable(data) {
+        var resultparagraph = document.getElementById("resultdiv");
+        resultparagraph.innerHTML = ""; // remove existing content
+        var resulttable = document.createElement("table");
+
+        var header = document.createElement("thead");
+        resulttable.appendChild(header);
+        var headerRow = document.createElement("tr");
+        resulttable.appendChild(headerRow);
+
+        header = document.createElement("th");
+        headerRow.appendChild(header);
+        header.innerHTML = "ID";
+        header = document.createElement("th");
+        headerRow.appendChild(header);
+        header.innerHTML = "Move name";
+
+        var tableBody = document.createElement("tbody");
+        resulttable.appendChild(tableBody);
+        
+        for (var i = 0; i < data.length; i++) {
+            var row = document.createElement("tr");
+            tableBody.appendChild(row);
+            var cell1 = document.createElement("td"); // cell for move id
+            row.appendChild(cell1);
+            cell1.innerHTML = data[i].id;
+            var cell2 = document.createElement("td"); // cell for move name
+            row.appendChild(cell2);
+            cell2.innerHTML = data[i].move_name;
+        }
+
+        resultparagraph.appendChild(resulttable);
+    }
+
+    function filter_search() {
+        var phrase = document.getElementById("search_phrase").value;
+
+        var http = new XMLHttpRequest();
+        var url = "?phrase=" + phrase;
+        http.open("GET", url, true);
+        http.setRequestHeader("Content-type", "application/json");
+
+        http.onreadystatechange = function () {
+            if (http.readyState === 4) {
+                if (http.status === 200) {
+                    var data = JSON.parse(http.responseText);
+                    createTable(data);
+                }
+            }
+        }
+
+        http.send(null);
+    }
+
+    function getMoves() {
+        var data = "{{move_list}}";
+        var parsedData = JSON.parse(data.replace(/&quot;/g, '"')); // move_list contains some characters we do not need, remove them
+        createTable(parsedData);
+    }
+
+    window.onload = getMoves;
+</script>
+
+<div id="main_content">
+<h2>Explore the moves database <a href="" onclick=showHelp()>?</a></h2>
+<div id="live_search">
+    Live search:
+    <input type="text" id="search_phrase" name="search_phrase" oninput="filter_search()" value="{{search_value}}" moves="{{move_list}}"/>
+</div>
+
+
+<div>
+    <form action="" method="GET">
+        <input type="text" name="searchphrase">
+        <input type="submit" value="Search by phrase" name="search_by_phrase">
+    </form>
+<!-- 
+    CYBER SECURITY FIX 3: Use POST method to search for moves. Remove the form above that uses GET and use the following form instead. Note the csrf token to post!
+    <form action="" method="POST">
+        {% csrf_token %}
+        <input type="text" name="searchphrase">
+        <input type="submit" value="Search by phrase" name="search_by_phrase">
+    </form>
+-->
+
+    <h3>The database contains the following moves matching your query:</h3>
+    {% if searchresults %}
+        <table>
+            <tr>
+                <th>
+                    ID
+                </th>
+                <th>
+                    Move name
+                </th>
+            </tr>
+            
+        {% for result in searchresults %}
+            <tr>
+                <td>
+                    {{result.id}}
+                </td>
+                <td>
+                    {{result}}
+                </td>
+            </tr>
+        {% endfor %}
+        </table>
+    {% endif %}
+    </div>
+
+
+    <div id="resultdiv"></div>
+</div>
 {% endblock %}

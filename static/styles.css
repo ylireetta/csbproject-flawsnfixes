@@ -1,0 +1,75 @@
+#base_header {
+    /*background-color: #1B998B;*/
+    padding: 0.5em;
+    margin-bottom: 1em;
+    color: #1B998B;
+}
+
+body {
+    background-color: #2D3047;
+}
+
+input {
+    padding: 0.5em;
+}
+
+button, input[type=submit] {
+    background-color: #1B998B;
+    border: none;
+    border-radius: 0.5em;
+    transition-duration: 0.4s;
+    padding: 0.5em;
+}
+
+button:hover, input[type=submit]:hover {
+    background-color: white;
+}
+
+input[type=text], input[type=date], input[type=password] {
+    background-color: #FF9B71;
+    border: none;
+    border-radius: 0.5em;
+}
+
+p {
+    color:#1B998B;
+    margin: 1em;
+}
+
+ul {
+    color: #40DDCB;
+}
+
+a, a:visited {
+    text-decoration: none;
+    font-weight: bold;
+    color: darkgrey;
+}
+
+a:hover {
+    text-decoration: line-through;
+}
+
+h2 {
+    color: #E84855;
+}
+
+table {
+    border-radius: 1em;
+    border-color: black;
+    border-style: dashed;
+}
+
+td {
+    padding: 0.5em;
+}
+
+#main_content {
+    color:#1B998B;
+}
+
+#live_search, #resultdiv {
+    display: none;
+    /* CYBER SECURITY FIX: change the div display from none to block to implement live search */
+    /*display: block;*/
+}

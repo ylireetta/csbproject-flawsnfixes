@@ -1,3 +1,4 @@
+import json
 from time import timezone
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
@@ -15,8 +16,20 @@ def index(request):
 # CYBER SECURITY FIX 2 (remove comment to fix flaw): Do not allow unauthenticated users to access page
 #@login_required
 def allmovesView(request):
-    moves_list = Move.objects.all()
-    context = {'move_list': moves_list}
+    results = Move.objects.all() # Show all moves as default in the search view table
+    moves_list = json.dumps(list(Move.objects.all().values()))
+    
+    # Live search
+    if request.method == 'GET' and 'phrase' in request.GET:
+        filtered_moves = list(Move.objects.filter(move_name__contains=request.GET.get('phrase')).values())
+        return JsonResponse(filtered_moves, safe=False)
+
+    # Flawed search
+    if 'search_by_phrase' in request.GET:
+        results = addToContext(request, 'searchresults')
+    
+    context = {'move_list': moves_list,
+        'searchresults': results}
     return render(request, 'moves/allmoves.html', context)
 
 # CYBER SECURITY FIX 2 (remove comment to fix flaw): Do not allow unauthenticated users to access page
@@ -33,7 +46,6 @@ def addmoveView(request):
 def searchSessionsViewToRename(request):
     context = {}
     filtered_sessions = None
-    results = None
     latest_session = None
     session_moves = None
     if request.method == 'POST' and request.user.is_authenticated:
@@ -43,31 +55,24 @@ def searchSessionsViewToRename(request):
             except:
                 # If parsing fails, no sessions are shown
                 filtered_sessions = None
-
-        if 'search_by_phrase' in request.POST:
-            results = addToContext(request, 'searchresults')
-
     try:
         latest_session, session_moves = addToContext(request, 'latest')
-        
     except:
         latest_session = None
 
     context = {
         'sessions': filtered_sessions,
-        'searchresults': results,
         'latest_session': latest_session,
         'session_sets': session_moves
     }
     
     return render(request, 'moves/searchsessions.html', context)
 
-# CYBER SECURITY FIX 3 (rename this or remove completely to fix): Use POST request instead of GET
+# CYBER SECURITY FIX 3 (to fix: 1) rename this or remove completely AND 2) rename the method above): Use POST request instead of GET
 def searchSessionsView(request):
     context = {}
     admin = None
     filtered_sessions = None
-    results = None
     latest_session = None
     session_moves = None
     # We need to check if the url contains get parameters - the method is also get when we navigate to this view as per usual
@@ -79,9 +84,6 @@ def searchSessionsView(request):
             except:
                 # If parsing fails, no sessions are shown
                 filtered_sessions = filtered_sessions
-        
-        if 'search_by_phrase' in request.GET:
-            results = addToContext(request, 'searchresults')
 
     try:
         latest_session, session_moves = addToContext(request, 'latest')
@@ -91,7 +93,6 @@ def searchSessionsView(request):
     context = {
         'admin': admin,
         'sessions': filtered_sessions,
-        'searchresults': results,
         'latest_session': latest_session,
         'session_sets': session_moves
     }
@@ -101,14 +102,20 @@ def searchSessionsView(request):
 # CYBER SECURITY FIX 5 (remove decorator to fix): when posting data, the views should require csrf token to be posted along with the actual data.
 @csrf_exempt
 def addSessionView(request):
+    saveresult = ''
+    session_id = None
     # https://stackoverflow.com/questions/59727384/multiple-django-forms-in-single-view-why-does-one-post-clear-other-forms
     if request.method == 'POST':
         if 'save_one_set' in request.POST:
-            saveSet(request)
+            session_id = saveSet(request)
+            saveresult = 'Set saved!'
         elif 'save_complete_session' in request.POST:
             saveSession(request)
+            saveresult = 'Session saved!'
     moves_list = Move.objects.all()
-    context = {'move_list': moves_list}
+    context = {'move_list': moves_list,
+    'saveresult': saveresult,
+    'session_id': session_id}
     return render(request, 'moves/addsession.html', context)
 
 def saveSet(request):
@@ -127,6 +134,8 @@ def saveSet(request):
         move = Move.objects.get(id=move_id)
 
         Set.objects.create(move_id=move, reps=reps, weight=weights, session_id=user_session_id)
+
+        return user_session_id
 
 def saveSession(request):
     user_session = Session.objects.filter(owner=request.user).latest('id')
@@ -163,11 +172,12 @@ def addToContext(request, attribute):
             phrase = request.GET.get('searchphrase')
 
         # The table for Move objects has been renamed to movestable in models.py
-        # CYBER SECURITY FIX 4: queries should not be made with raw SQL and especially not by using placeholders in the SQL string
-        results = Move.objects.raw("SELECT id, move_name FROM movestable WHERE move_name LIKE '%%%s%%'" % phrase)
-
+        # CYBER SECURITY FIX 4: queries should not be made with raw SQL and especially not by using placeholders in the SQL string.
         # Fix flaw 4 by using the following query method instead of raw SQL
         #results = Move.objects.filter(move_name__contains=phrase)
+        
+        results = Move.objects.raw("SELECT id, move_name FROM movestable WHERE move_name LIKE '%%%s%%'" % phrase)
+
         return results
 
     if attribute == 'admin':

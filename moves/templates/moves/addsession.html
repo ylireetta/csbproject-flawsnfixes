@@ -3,81 +3,60 @@
 
 {% block content %}
 <script>
-    var myArray = [];
-
-    function addToArray() {
-        var moveSelection = document.getElementById("moves");
-        var movename = moveSelection.options[moveSelection.selectedIndex].innerHTML;
-        var reps = document.getElementById("reps").value;
-        var weights = document.getElementById("weights").value;
-        var moveId = document.getElementById("moves").value;
-
-        var newMove = {
-            'moveId': moveId,
-            'movename': movename,
-            'reps': reps,
-            'weights': weights
-        };
-
-        myArray.push(newMove);
-
-        var http = new XMLHttpRequest();
-        // We are not using any CSRF protection(!) this should not be done in production
-        http.open("POST", '', true);
-        http.setRequestHeader("Content-type", "application/json");
-
-        http.onreadystatechange = function () {
-                    if (http.readyState === 4) {
-                        if (http.status === 200) {
-                            console.log(http.responseText);
-                        }
-                    }
-                }
-
-        http.send(JSON.stringify(newMove));
-
-
-    }
-
     function startCreating() {
-        var x = document.getElementById("session_form");
-        if (x.style.display === "none") {
-            x.style.display = "block";
+        var sessionform = document.getElementById("session_form");
+
+        if (sessionform.style.display === "none") {
+            sessionform.style.display = "block";
         } else {
-            x.style.display = "none";
+            sessionform.style.display = "none";
         }
     }
 
+    function showHelp() {
+        alert("When you want to enter a new training session to the database, click the Start creating button.\n\n" +
+        "Select a move and add reps and the weights you used. When you are done, enter the set by clicking Add set.\n\n" +
+        "When you are satisfied with the whole session, click Save workout session and save the session to database!\n\n" +
+        "You can explore all saved sessions on the Search for sessions page.");
+    }
 
-
+    setTimeout(() => {
+        var resultbox = document.getElementById("resultbox");
+        if (resultbox)
+            resultbox.style.display = "none";
+    }, 5000);
 </script>
-<p><button id="start" onclick="startCreating()">Start</button></p>
-<form id="session_form" style="display:none;" method="POST">
-    <!-- CYBER SECURITY FIX 5 (remove the following line comment to fix): send csrf token along with the data -->
-    <!--{% csrf_token %}-->
-    <label for="moves">Select move:</label>
-    <select id="moves" name="moves">
-        {% for move in move_list %}
-            <option value="{{move.id}}">{{move.move_name}}</option>
-        {% endfor %}
-    </select>
-    <br />
-    <label for="reps">Reps:</label>
-    <input type="number" min="0" value="0" name="reps" id="reps">
-    <br />
-    <label for="weights">Weights (kg):</label>
-    <input type="number"  min="0" value="0" name="weights" id="weights">
-    <br />
-    <input type="submit" name="save_one_set" value="Add set">
-</form>
 
+<div id="main_content">
+    <h2>Create a new training session <a href="" onclick=showHelp()>?</a></h2>
 
-<form action="" method="POST">
-    <!-- CYBER SECURITY FIX 5 (remove the following line comment to fix): send csrf token along with the data -->
-    <!--{% csrf_token %}-->
-    <input type="hidden" id="selected_moves" name="selected_moves">
-    <input type="submit" name="save_complete_session" value="Save workout session">
-</form>
+    {% if saveresult %}
+    <div id="resultbox">{{saveresult}}</div>
+    {% endif %}
 
+    <button id="start" onclick="startCreating()">Start creating</button>
+    <form id="session_form" style="display:none;" method="POST">
+        <!-- CYBER SECURITY FIX 5 (remove the following line comment to fix): send csrf token along with the data -->
+        <!--{% csrf_token %}-->
+        <label for="moves">Select move:</label>
+        <select id="moves" name="moves">
+            {% for move in move_list %}
+                <option value="{{move.id}}">{{move.move_name}}</option>
+            {% endfor %}
+        </select>
+        <br />
+        <label for="reps">Reps:</label>
+        <input type="number" min="0" value="0" name="reps" id="reps">
+        <br />
+        <label for="weights">Weights (kg):</label>
+        <input type="number"  min="0" value="0" name="weights" id="weights">
+        <br />
+        <input type="submit" name="save_one_set" value="Add set">
+        
+        {% if session_id %}
+        <input type="submit" name="save_complete_session" value="Save workout session">
+        {% endif %}
+    </form>
 
+</div>
 {% endblock %}
