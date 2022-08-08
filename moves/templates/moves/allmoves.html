@@ -4,10 +4,6 @@
 {% block content %}
 
 <script>
-    function showHelp() {
-        alert("You can search the moves database by providing a move name (or a part of it).\n\n" +
-        "For example, searching with the phrase 'at' would return both 'squAT' and 'seATed dumbbell lATeral raise'.");
-    }
 
     function createTable(data) {
         var resultparagraph = document.getElementById("resultdiv");
@@ -73,7 +69,7 @@
 </script>
 
 <div id="main_content">
-<h2>Explore the moves database <a href="" onclick=showHelp()>?</a></h2>
+<h2>Explore the moves database <a href="" name="allmoves" onclick=showHelp(name)>?</a></h2>
 <div id="live_search">
     Live search:
     <input type="text" id="search_phrase" name="search_phrase" oninput="filter_search()" value="{{search_value}}" moves="{{move_list}}"/>

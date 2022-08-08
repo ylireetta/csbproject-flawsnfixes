@@ -2,33 +2,9 @@
 {% block title %}Add new training session page{% endblock %}
 
 {% block content %}
-<script>
-    function startCreating() {
-        var sessionform = document.getElementById("session_form");
-
-        if (sessionform.style.display === "none") {
-            sessionform.style.display = "block";
-        } else {
-            sessionform.style.display = "none";
-        }
-    }
-
-    function showHelp() {
-        alert("When you want to enter a new training session to the database, click the Start creating button.\n\n" +
-        "Select a move and add reps and the weights you used. When you are done, enter the set by clicking Add set.\n\n" +
-        "When you are satisfied with the whole session, click Save workout session and save the session to database!\n\n" +
-        "You can explore all saved sessions on the Search for sessions page.");
-    }
-
-    setTimeout(() => {
-        var resultbox = document.getElementById("resultbox");
-        if (resultbox)
-            resultbox.style.display = "none";
-    }, 5000);
-</script>
 
 <div id="main_content">
-    <h2>Create a new training session <a href="" onclick=showHelp()>?</a></h2>
+    <h2>Create a new training session <a href="" name="addsession" onclick=showHelp(name)>?</a></h2>
 
     {% if saveresult %}
     <div id="resultbox">{{saveresult}}</div>

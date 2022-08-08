@@ -4,6 +4,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, JsonResponse
+from django.contrib import messages
 
 from .models import Move, Session, Set
 import datetime
@@ -115,9 +116,11 @@ def addSessionView(request):
             saveSession(request)
             saveresult = 'Session saved!'
     moves_list = Move.objects.all()
-    context = {'move_list': moves_list,
-    'saveresult': saveresult,
-    'session_id': session_id}
+    context = {
+        'move_list': moves_list,
+        'saveresult': saveresult,
+        'session_id': session_id
+    }
     return render(request, 'moves/addsession.html', context)
 
 def saveSet(request):
@@ -148,12 +151,35 @@ def saveSession(request):
 #@login_required
 def deleteSession(request, id):
     # The url is something like localhost:8000/delete/1, so we get the id of the object to delete as parameter
+
+    # CYBER SECURITY FIX 3: remove code on lines 158-161 and remove line comment on line 157 to check if the user who made the request is the owner of the training session to delete
+
+    # fixedDelete(request, id)
     try:
         Session.objects.get(pk=id).delete()
     except:
         return redirect('/moves/searchsessions')
 
     return redirect('/moves/searchsessions')
+
+
+def fixedDelete(request, id):
+    try:
+        session_to_delete = Session.objects.get(pk=id)
+
+        if (session_to_delete):
+            owner_user = session_to_delete.owner
+
+            if request.user.username == owner_user:
+                try:
+                    Session.objects.get(pk=id).delete()
+                except:
+                    messages.add_message(request, messages.ERROR, f'Deleting session id {id} failed.')
+            else:
+                messages.add_message(request, messages.ERROR, f'You are not the owner of session id {id}.')
+    except:
+        messages.add_message(request, messages.ERROR, f'Deleting session id {id} failed.')
+
 
 def addToContext(request, attribute):
     if attribute == 'sessions':

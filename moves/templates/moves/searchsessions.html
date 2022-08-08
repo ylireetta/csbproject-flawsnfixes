@@ -3,8 +3,19 @@
 {% block title %}Search for sessions page{% endblock %}
 
 {% block content %}
+
 <div id="main_content">
-    <h2>Search for sessions in database</h2>
+        {% if messages %}
+        <div id="resultbox">
+            <ul class="messages">
+                {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+    <h2>Search for sessions in database <a href="" name="searchsessions" onclick=showHelp(name)>?</a></h2>
     <form action="" method="GET">
         {% if user.is_superuser %}
         <input type="hidden" name="admin" value="1">

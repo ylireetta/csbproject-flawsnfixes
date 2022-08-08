@@ -72,3 +72,14 @@ td {
     /* CYBER SECURITY FIX: change the div display from none to block to implement live search */
     display: none;
 }
+
+#resultbox {
+    background-color: white;
+    border-radius: 1em;
+    padding: 0.5em;
+    width: 25%;
+}
+
+li.error {
+    color: red;
+}
