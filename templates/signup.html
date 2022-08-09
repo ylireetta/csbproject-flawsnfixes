@@ -1,0 +1,47 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="{% static 'styles.css' %}">
+        <script src="{% static 'scripts.js' %}"></script>
+        <meta charset="utf-8">
+        <title>Sign up page</title>
+    </head>
+</html>
+<body>
+    <main>
+        {% if messages %}
+        <div id="resultbox">
+            <ul class="messages">
+                {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        
+    <a href="/moves/">Index</a>
+    <h2>Sign up</h2>
+        <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" name="djangoform">Sign up</button>
+      </form>
+    
+    
+      <!--CYBER SECURITY FIX: remove the following form completely and use the form above instead-->
+        <form method="post" id="signupform">
+        {% csrf_token %}
+        <label for="username">Username:</label>
+        <input type="text" name="username"><br />
+
+        <label for="email">Email:</label>
+        <input type="text" name="email"><br />
+
+        <label for="password">Password:</label>
+        <input type="password" name="password"><br />
+        <button type="submit" name="signupform">Sign up</button>
+      </form>
+    
+    </main>
+</body>

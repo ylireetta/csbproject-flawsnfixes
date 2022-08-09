@@ -9,4 +9,5 @@ urlpatterns = [
     path('searchsessions/', views.searchSessionsView, name='searchsessions'),
     path('addsession/', views.addSessionView, name='addsession'),
     path('delete/<int:id>/', views.deleteSession, name='deletesession'),
+    path('signup/', views.signupView, name='signup'),
 ]

@@ -83,3 +83,12 @@ td {
 li.error {
     color: red;
 }
+
+#signupform input {
+    margin-bottom: 0.5em;
+}
+
+#signupform label {
+
+    color:#1B998B;
+}

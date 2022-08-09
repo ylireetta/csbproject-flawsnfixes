@@ -5,6 +5,8 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, JsonResponse
 from django.contrib import messages
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
 
 from .models import Move, Session, Set
 import datetime
@@ -14,8 +16,7 @@ import datetime
 def index(request):
     return render(request, 'moves/index.html')
 
-# CYBER SECURITY FIX 2 (remove comment to fix flaw): Do not allow unauthenticated users to access page
-#@login_required
+@login_required
 def allmovesView(request):
     results = Move.objects.all() # Show all moves as default in the search view table
     moves_list = json.dumps(list(Move.objects.all().values()))
@@ -25,25 +26,29 @@ def allmovesView(request):
         filtered_moves = list(Move.objects.filter(move_name__contains=request.GET.get('phrase')).values())
         return JsonResponse(filtered_moves, safe=False)
 
-    # Flawed search
+    # Flawed search that uses GET form: remove this to fix
     if 'search_by_phrase' in request.GET:
         results = addToContext(request, 'searchresults')
+
+    # Fixed search that uses POST form
+    if 'search_by_phrase' in request.POST:
+        results = addToContext(request, 'searchresults')
     
-    context = {'move_list': moves_list,
-        'searchresults': results}
+    context = {
+        'move_list': moves_list,
+        'searchresults': results
+    }
     return render(request, 'moves/allmoves.html', context)
 
-# CYBER SECURITY FIX 2 (remove comment to fix flaw): Do not allow unauthenticated users to access page
-#@login_required
+@login_required
 def addmoveView(request):
     if request.method == 'POST':
         Move.objects.create(move_name=request.POST.get('new_move_name'))
         return redirect('/moves')
     return render(request, 'moves/addmove.html')
 
-# CYBER SECURITY FIX 2 (remove comment to fix flaw): Do not allow unauthenticated users to access page
-#@login_required
-# CYBER SECURITY FIX 3 (rename this --> searchSessionsView): Use POST request to search for sessions completed on a specific date
+@login_required
+# CYBER SECURITY FIX 2: (rename this --> searchSessionsView) Use POST request to search for sessions completed on a specific date
 def searchSessionsViewToRename(request):
     context = {}
     filtered_sessions = None
@@ -69,9 +74,8 @@ def searchSessionsViewToRename(request):
     
     return render(request, 'moves/searchsessions.html', context)
 
-# CYBER SECURITY FIX 2 (remove comment to fix flaw): Do not allow unauthenticated users to access page
-#@login_required
-# CYBER SECURITY FIX 3 (to fix: 1) rename this or remove completely AND 2) rename the method above): Use POST request instead of GET
+@login_required
+# CYBER SECURITY FIX 2 (to fix: 1) rename this or remove completely AND 2) rename the method above): Use POST request instead of GET
 def searchSessionsView(request):
     context = {}
     admin = None
@@ -147,21 +151,20 @@ def saveSession(request):
     user_session.ended = True
     user_session.save()
 
-# CYBER SECURITY FIX 2 (remove comment to fix flaw): Do not allow unauthenticated users to access page
-#@login_required
+@login_required
 def deleteSession(request, id):
     # The url is something like localhost:8000/delete/1, so we get the id of the object to delete as parameter
 
-    # CYBER SECURITY FIX 3: remove code on lines 158-161 and remove line comment on line 157 to check if the user who made the request is the owner of the training session to delete
+    # CYBER SECURITY FIX 2: remove code on lines 158-161 and remove line comment on line 157 to check if the user who made the request is the owner of the training session to delete
 
     # fixedDelete(request, id)
     try:
         Session.objects.get(pk=id).delete()
+        messages.add_message(request, messages.SUCCESS, f'Session id {id} removed!')
     except:
         return redirect('/moves/searchsessions')
 
     return redirect('/moves/searchsessions')
-
 
 def fixedDelete(request, id):
     try:
@@ -173,13 +176,13 @@ def fixedDelete(request, id):
             if request.user.username == owner_user:
                 try:
                     Session.objects.get(pk=id).delete()
+                    messages.add_message(request, messages.SUCCESS, f'Session id {id} removed!')
                 except:
                     messages.add_message(request, messages.ERROR, f'Deleting session id {id} failed.')
             else:
                 messages.add_message(request, messages.ERROR, f'You are not the owner of session id {id}.')
     except:
         messages.add_message(request, messages.ERROR, f'Deleting session id {id} failed.')
-
 
 def addToContext(request, attribute):
     if attribute == 'sessions':
@@ -216,3 +219,26 @@ def addToContext(request, attribute):
         session_moves = Set.objects.filter(session_id=latest_session)
 
         return latest_session, session_moves
+    
+def signupView(request):
+    # CYBER SECURITY FIX 3: Remove the following code and use Django's own signup form instead
+    form = None
+    if request.method == 'POST':
+        if 'signupform' in request.POST:
+            new_username = request.POST.get('username')
+            new_password = request.POST.get('password')
+            new_email = request.POST.get('email')
+            User.objects.create_user(new_username, new_email, new_password)
+            return redirect('/moves')
+        
+        # Remove all following comments to fix flaw
+        #if 'djangoform' in request.POST:
+        #    form = UserCreationForm(request.POST)
+        #    if form.is_valid():
+        #        form.save()
+        #        return redirect('/moves')
+        #    else:
+        #        messages.add_message(request, messages.ERROR, 'Please check instructions for username and password.')
+        #        return redirect('/moves/signup')
+    form = UserCreationForm()
+    return render(request, 'signup.html', {'form': form})
