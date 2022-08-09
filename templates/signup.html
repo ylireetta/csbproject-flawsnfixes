@@ -22,14 +22,15 @@
         
     <a href="/moves/">Index</a>
     <h2>Sign up</h2>
+    <!--CYBER SECURITY FIX 3: remove comments and use this form
         <form method="post">
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit" name="djangoform">Sign up</button>
       </form>
+    -->
     
-    
-      <!--CYBER SECURITY FIX: remove the following form completely and use the form above instead-->
+      <!--CYBER SECURITY FIX 3: remove the following form completely and use the form above instead-->
         <form method="post" id="signupform">
         {% csrf_token %}
         <label for="username">Username:</label>
