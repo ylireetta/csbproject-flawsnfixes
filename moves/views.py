@@ -155,7 +155,7 @@ def saveSession(request):
 def deleteSession(request, id):
     # The url is something like localhost:8000/delete/1, so we get the id of the object to delete as parameter
 
-    # CYBER SECURITY FIX 2: remove code on lines 158-161 and remove line comment on line 157 to check if the user who made the request is the owner of the training session to delete
+    # CYBER SECURITY FIX 2: remove code on lines 161-165 and remove line comment on line 160 to check if the user who made the request is the owner of the training session to delete
 
     # fixedDelete(request, id)
     try:
