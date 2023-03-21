@@ -21,7 +21,7 @@ The following things should be done in the project root directory.
 
 The first flaw can be found from the settings.py file of the project. If a user has logged in and navigates to a different site or even closes the browser completely, their session on the project site does not end. This means that anyone who has access to the same computer that the “victim” has used also has access to the project site and can operate in the system with the victim’s authority.
 
-This flaw can be fixed by simply adding a boolean value to the project’s settings.py file – SESSION_EXPIRE_AT_BROWSER_CLOSE = True. By adding this, the user session will end when the browser window is closed. However, if the user simply leaves the site and continues to use the same browser window, the sessions is not terminated. The fix has been commented out as of now, but it can easily be implemented by removing the line comment on line 137.
+This flaw can be fixed by simply adding a boolean value to the project’s settings.py file – SESSION_EXPIRE_AT_BROWSER_CLOSE = True. By adding this, the user session will end when the browser window is closed. However, if the user simply leaves the site and continues to use the same browser window, the session is not terminated. The fix has been commented out as of now, but it can easily be implemented by removing the line comment on line 137.
 
 
 # FLAW 2: BROKEN ACCESS CONTROL
